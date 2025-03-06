@@ -19,7 +19,7 @@ module StaxPayments
       if @response.body && !@response.body.empty?
         begin
           error_data = JSON.parse(@response.body, symbolize_names: true)
-          return error_data[:error][:message] if error_data[:error] && error_data[:error][:message]
+          return error_data[:error][:message] if error_data[:error].is_a?(Hash) && error_data[:error][:message]
           return error_data[:message] if error_data[:message]
           return error_data.to_s
         rescue JSON::ParserError

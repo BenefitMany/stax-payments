@@ -34,7 +34,6 @@ Set the following environment variables:
 
 ```
 STAX_API_KEY=your_api_key
-STAX_API_SECRET=your_api_secret
 ```
 
 Then initialize the client:
@@ -136,7 +135,6 @@ You will need to add a .env file to the root of the project with the following v
 
 ```
 STAX_API_KEY=your_api_key
-STAX_API_SECRET=your_api_secret
 ```
 
 After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

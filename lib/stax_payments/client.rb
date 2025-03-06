@@ -3,11 +3,9 @@
 require_relative 'client/customers'
 require_relative 'client/payments'
 require_relative 'client/transactions'
-require_relative 'client/cards'
 require_relative 'client/bank_accounts'
 require_relative 'client/invoices'
 require_relative 'client/subscriptions'
-require_relative 'client/plans'
 require_relative 'client/refunds'
 require_relative 'client/webhooks'
 
@@ -15,11 +13,9 @@ require_relative 'model/stax_model'
 require_relative 'model/customer'
 require_relative 'model/payment'
 require_relative 'model/transaction'
-require_relative 'model/card'
 require_relative 'model/bank_account'
 require_relative 'model/invoice'
 require_relative 'model/subscription'
-require_relative 'model/plan'
 require_relative 'model/refund'
 require_relative 'model/webhook'
 
@@ -28,15 +24,14 @@ module StaxPayments
     include StaxPayments::Client::Customers
     include StaxPayments::Client::Payments
     include StaxPayments::Client::Transactions
-    include StaxPayments::Client::Cards
     include StaxPayments::Client::BankAccounts
     include StaxPayments::Client::Invoices
     include StaxPayments::Client::Subscriptions
-    include StaxPayments::Client::Plans
     include StaxPayments::Client::Refunds
     include StaxPayments::Client::Webhooks
 
-    API_BASE_URL = 'https://api.staxpayments.com/'.freeze
+    # API base URL from Stax API documentation
+    API_BASE_URL = 'https://apiprod.fattlabs.com'.freeze
 
     def initialize(auth = nil)
       @auth = auth || load_from_environment
@@ -49,11 +44,10 @@ module StaxPayments
     private
 
     def load_from_environment
-      return if ENV['STAX_API_KEY'].nil? || ENV['STAX_API_SECRET'].nil?
+      return if ENV['STAX_API_KEY'].nil?
 
       {
-        api_key: ENV['STAX_API_KEY'],
-        api_secret: ENV['STAX_API_SECRET']
+        api_key: ENV['STAX_API_KEY']
       }
     end
 
@@ -63,7 +57,7 @@ module StaxPayments
         params: params.to_camelback_keys,
         headers: {
           "Content-Type" => "multipart/form-data",
-          'Authorization' => "Basic #{stax_basic_auth}"
+          'Authorization' => "Bearer #{@auth[:api_key]}"
         },
         body: { file: ::File.open(file_path) }
       }
@@ -71,10 +65,14 @@ module StaxPayments
       proxy = @auth[:proxy] || ENV['PROXY']
       request_params[:proxy] = proxy unless proxy.nil?
 
+      # Add API version prefix to the URL path
+      full_url = "#{API_BASE_URL}#{url_path}"
+
       response = Typhoeus::Request.new(
-        "#{API_BASE_URL}#{url_path}",
+        full_url,
         request_params
       ).run
+
       return StaxError.new(response) unless response.success?
 
       process_stax_response(response.body)
@@ -98,10 +96,18 @@ module StaxPayments
       proxy = @auth[:proxy] || ENV['PROXY']
       request_params[:proxy] = proxy unless proxy.nil?
 
+      # Add API version prefix to the URL path
+      full_url = "#{API_BASE_URL}#{url_path}"
+      puts "Making request to: #{full_url}"
+
       response = Typhoeus::Request.new(
-        "#{API_BASE_URL}#{url_path}",
+        full_url,
         request_params
       ).run
+
+      puts "Response code: #{response.code}"
+      puts "Response body: #{response.body}" if response.body
+
       return StaxError.new(response) unless response.success?
 
       process_stax_response(response.body)
@@ -111,12 +117,8 @@ module StaxPayments
       {
         'Content-Type' => 'application/json',
         'charset' => 'utf-8',
-        'Authorization' => "Basic #{stax_basic_auth}"
+        'Authorization' => "Bearer #{@auth[:api_key]}"
       }
-    end
-
-    def stax_basic_auth
-      Base64.strict_encode64("#{@auth[:api_key]}:#{@auth[:api_secret]}")
     end
   end
 end

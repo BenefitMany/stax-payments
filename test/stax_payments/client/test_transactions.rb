@@ -146,4 +146,101 @@ class TestTransactionsClient < Minitest::Test
     export_url = @client.export_transactions(params)
     assert_equal 'https://api.staxpayments.com/exports/transactions_123456789.csv', export_url
   end
+
+  def test_capture_transaction
+    transaction_id = 'txn_123456789'
+    
+    # Expected response for a captured transaction
+    expected_response = {
+      id: transaction_id,
+      type: 'capture',
+      success: true,
+      total: 5.00,
+      method: 'card',
+      pre_auth: false,
+      is_captured: 0,
+      last_four: '1111',
+      created_at: '2023-03-01T12:00:00Z',
+      customer_id: 'cus_123456789',
+      payment_method_id: 'pm_123456789'
+    }
+    
+    # Test with a specific capture amount
+    capture_args = { total: 5.00 }
+    
+    @client.expects(:process_request)
+           .with(:post, "transaction/#{transaction_id}/capture", body: capture_args)
+           .returns(expected_response)
+    
+    transaction = @client.capture_transaction(transaction_id, capture_args)
+    
+    assert_instance_of StaxPayments::Transaction, transaction
+    assert_equal transaction_id, transaction.id
+    assert_equal 'capture', transaction.type
+    assert_equal true, transaction.success
+    assert_equal 5.00, transaction.total
+    assert_equal 'card', transaction.method
+    assert_equal false, transaction.pre_auth
+  end
+  
+  def test_capture_transaction_full_amount
+    transaction_id = 'txn_123456789'
+    
+    # Expected response for a captured transaction (full amount)
+    expected_response = {
+      id: transaction_id,
+      type: 'capture',
+      success: true,
+      total: 10.00,
+      method: 'card',
+      pre_auth: false,
+      is_captured: 0,
+      last_four: '1111',
+      created_at: '2023-03-01T12:00:00Z',
+      customer_id: 'cus_123456789',
+      payment_method_id: 'pm_123456789'
+    }
+    
+    # Test with no arguments (captures full amount)
+    @client.expects(:process_request)
+           .with(:post, "transaction/#{transaction_id}/capture", body: {})
+           .returns(expected_response)
+    
+    transaction = @client.capture_transaction(transaction_id)
+    
+    assert_instance_of StaxPayments::Transaction, transaction
+    assert_equal transaction_id, transaction.id
+    assert_equal 'capture', transaction.type
+    assert_equal true, transaction.success
+    assert_equal 10.00, transaction.total
+    assert_equal 'card', transaction.method
+    assert_equal false, transaction.pre_auth
+  end
+  
+  def test_capture_transaction_error
+    transaction_id = 'invalid_transaction_id'
+    
+    # Error response
+    error_response = {
+      status: 'error',
+      message: 'The selected id is invalid.',
+      error_code: 'invalid_transaction_id'
+    }
+    
+    # Create a StaxError object
+    stax_error = StaxPayments::StaxError.new('The selected id is invalid.')
+    stax_error.status_code = 422
+    stax_error.error_details = { 'id' => ['The selected id is invalid.'] }
+    
+    @client.expects(:process_request)
+           .with(:post, "transaction/#{transaction_id}/capture", body: {})
+           .returns(stax_error)
+    
+    result = @client.capture_transaction(transaction_id)
+    
+    assert_instance_of StaxPayments::StaxError, result
+    assert_equal 'The selected id is invalid.', result.message
+    assert_equal 422, result.status_code
+    assert_equal({ 'id' => ['The selected id is invalid.'] }, result.error_details)
+  end
 end 

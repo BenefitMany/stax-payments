@@ -32,6 +32,14 @@ module StaxPayments
     # - metadata: Additional metadata about the transaction
     # - created_at: When the transaction was created
     # - updated_at: When the transaction was last updated
+    # - settled_at: When the transaction was settled
+    # - is_refundable: Whether the transaction can be refunded
+    # - is_cnp_refundable: Whether the transaction can be refunded without the card present
+    # - success: Success flag (1 for success, 0 for failure)
+    # - message: Message from the processor or error message
+    # - child_transactions: Array of child transactions (refunds, voids)
+    # - source: Source of the transaction (e.g., 'api', 'terminalservice.dejavoo')
+    # - pre_auth: Whether the transaction is a pre-authorization
     
     # Helper methods for transaction status
     def pending?
@@ -78,6 +86,59 @@ module StaxPayments
     # Helper method to get the amount in dollars
     def amount_in_dollars
       amount.to_f / 100 if amount
+    end
+
+    # Helper method to check if transaction is a pre-authorization
+    def pre_auth?
+      pre_auth == true
+    end
+
+    # Helper method to check if transaction is successful
+    def successful?
+      success == 1
+    end
+
+    # Helper method to check if transaction has settled
+    def settled?
+      !settled_at.nil?
+    end
+
+    # Helper method to check if transaction has child transactions
+    def has_child_transactions?
+      child_transactions && !child_transactions.empty?
+    end
+
+    # Helper method to get total refunded amount
+    def total_refunded
+      return 0 unless has_child_transactions?
+
+      child_transactions
+        .select { |t| t[:type] == 'refund' && t[:success] == 1 }
+        .sum { |t| t[:amount].to_i }
+    end
+
+    # Helper method to get total refunded amount in dollars
+    def total_refunded_in_dollars
+      total_refunded.to_f / 100
+    end
+
+    # Helper method to check if transaction is fully refunded
+    def fully_refunded?
+      return false unless has_child_transactions?
+      
+      total_refunded >= amount.to_i
+    end
+
+    # Helper method to get remaining refundable amount
+    def remaining_refundable_amount
+      return 0 unless is_refundable
+      
+      [amount.to_i - total_refunded, 0].max
+    end
+
+    # Helper method to get remaining refundable amount in dollars
+    def remaining_refundable_amount_in_dollars
+      remaining_refundable_amount.to_f / 100
     end
   end
 end

@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'typhoeus', '~> 1.4'
-  spec.add_dependency 'json', '~> 2.7'
+  spec.add_dependency 'json', '~> 2.3'
   spec.add_dependency 'plissken', '~> 3.0'
   spec.add_dependency 'awrence', '~> 3.0'
   spec.add_dependency 'ostruct', '~> 0.6.1'

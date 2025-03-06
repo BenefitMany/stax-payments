@@ -5,8 +5,8 @@ require 'test_helper'
 class TestClient < Minitest::Test
   def test_initialize_with_env_vars
     # Skip if environment variables are not set
-    skip unless ENV['STAX_API_KEY'] && ENV['STAX_API_SECRET']
-    
+    skip unless ENV['STAX_API_KEY']
+
     client = StaxPayments::Client.new
     assert_instance_of StaxPayments::Client, client
   end
@@ -26,4 +26,4 @@ class TestClient < Minitest::Test
       end
     end
   end
-end 
+end
