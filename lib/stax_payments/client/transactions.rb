@@ -158,6 +158,40 @@ module StaxPayments
 
         StaxPayments::Transaction.new(result)
       end
+
+      # Void a transaction
+      # @param transaction_id [String] The ID of the transaction to void
+      # @return [StaxPayments::Transaction] The voided transaction object
+      # @example
+      #   # Void a transaction
+      #   transaction = client.void_transaction('txn_123456789')
+      #   puts "Transaction voided: #{transaction.is_voided}"
+      def void_transaction(transaction_id)
+        result = process_request(:post, "/transaction/#{transaction_id}/void")
+        return result if result.is_a?(StaxError)
+
+        StaxPayments::Transaction.new(result)
+      end
+
+      # Refund a transaction
+      # @param transaction_id [String] The ID of the transaction to refund
+      # @param args [Hash] Optional parameters
+      # @option args [Float, String] :total (required) Amount to refund in dollars and cents
+      # @return [StaxPayments::Transaction] The refunded transaction object
+      # @example
+      #   # Refund a transaction
+      #   transaction = client.refund_transaction('txn_123456789', { total: 5.00 })
+      #   puts "Transaction refunded: #{transaction.total_refunded}"
+      #   puts "Child transactions: #{transaction.child_transactions.length}"
+      def refund_transaction(transaction_id, args = {})
+        # Validate that total is provided
+        raise StaxPayments::StaxError.new('Total amount is required for refund') if args[:total].nil?
+
+        result = process_request(:post, "/transaction/#{transaction_id}/refund", body: args)
+        return result if result.is_a?(StaxError)
+
+        StaxPayments::Transaction.new(result)
+      end
     end
   end
 end

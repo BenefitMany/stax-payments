@@ -142,9 +142,10 @@ module StaxPayments
         end
 
         result = process_request(:post, '/customer', body: args)
+        puts result
         return result if result.is_a?(StaxError)
 
-        StaxPayments::Customer.new(result[:customer])
+        StaxPayments::Customer.new(result)
       end
 
       # Update an existing customer's information

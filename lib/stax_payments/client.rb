@@ -3,32 +3,29 @@
 require_relative 'client/customers'
 require_relative 'client/payments'
 require_relative 'client/transactions'
-require_relative 'client/bank_accounts'
 require_relative 'client/invoices'
 require_relative 'client/subscriptions'
-require_relative 'client/refunds'
 require_relative 'client/webhooks'
+require_relative 'client/payment_methods'
 
 require_relative 'model/stax_model'
 require_relative 'model/customer'
 require_relative 'model/payment'
 require_relative 'model/transaction'
-require_relative 'model/bank_account'
 require_relative 'model/invoice'
 require_relative 'model/subscription'
-require_relative 'model/refund'
 require_relative 'model/webhook'
+require_relative 'model/payment_method'
 
 module StaxPayments
   class Client
     include StaxPayments::Client::Customers
     include StaxPayments::Client::Payments
     include StaxPayments::Client::Transactions
-    include StaxPayments::Client::BankAccounts
     include StaxPayments::Client::Invoices
     include StaxPayments::Client::Subscriptions
-    include StaxPayments::Client::Refunds
     include StaxPayments::Client::Webhooks
+    include StaxPayments::Client::PaymentMethods
 
     # API base URL from Stax API documentation
     API_BASE_URL = 'https://apiprod.fattlabs.com'.freeze
