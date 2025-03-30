@@ -39,7 +39,7 @@ begin
   
   # Create the invoice
   invoice = client.create_invoice(
-    customer_id: customer_id,
+    customer_id: customer.id,
     meta: {
       tax: 2.00,
       subtotal: 10.00,
