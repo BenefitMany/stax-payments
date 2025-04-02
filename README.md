@@ -159,6 +159,8 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
   * List `GET /transactions`
   * View `GET /transactions/:transaction_id`
   * Search `POST /transactions/search`
+
+## TODO Endpoints
 * Cards
   * List `GET /customers/:customer_id/cards`
   * View `GET /customers/:customer_id/cards/:card_id`
@@ -205,7 +207,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/yourusername/stax-payments. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/benefitmany/stax-payments. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the code of conduct.
 
 ## License
 
