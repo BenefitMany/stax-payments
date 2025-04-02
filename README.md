@@ -161,6 +161,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
   * Search `POST /transactions/search`
 
 ## TODO Endpoints
+
 * Cards
   * List `GET /customers/:customer_id/cards`
   * View `GET /customers/:customer_id/cards/:card_id`
