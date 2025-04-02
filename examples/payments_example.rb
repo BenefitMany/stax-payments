@@ -1,8 +1,11 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'pry-byebug'
 require 'dotenv/load'
-require 'stax_payments'
+require_relative '../lib/stax_payments'
+
+Dotenv.load('../.env')
 
 # Initialize the Stax Payments client
 client = StaxPayments::Client.new(
@@ -20,16 +23,16 @@ begin
   # First, let's get a customer
   customers_result = client.customers(limit: 1)
   customers = customers_result.is_a?(Hash) ? customers_result[:customers] : customers_result
-  
+
   if customers.empty?
     puts "No customers found. Please create a customer first."
   else
     customer_id = customers.first.id
     puts "Using customer: #{customers.first.firstname} #{customers.first.lastname} (ID: #{customer_id})"
-    
+
     # Get payment methods for the customer
     payment_methods = client.customer_payment_methods(customer_id) rescue []
-    
+
     if payment_methods.empty?
       puts "No payment methods found for this customer."
     else
@@ -44,7 +47,7 @@ begin
         end
         puts
       end
-      
+
       # Store the first payment method ID for later use
       payment_method_id = payment_methods.first.id
     end
@@ -77,7 +80,7 @@ begin
       },
       pre_auth: false
     })
-    
+
     puts "Transaction created successfully!"
     puts "Transaction ID: #{transaction.id}"
     puts "Type: #{transaction.type}"
@@ -86,13 +89,13 @@ begin
       puts "Amount: $#{transaction.total}"
       puts "Method: #{transaction.method}"
       puts "Created at: #{transaction.created_at}"
-      
+
       # Display payment method details
       if transaction.payment_method
         puts "Payment method: #{transaction.payment_method[:nickname]}"
         puts "Last four: #{transaction.last_four}"
       end
-      
+
       # Display customer details
       if transaction.customer
         puts "Customer: #{transaction.customer[:firstname]} #{transaction.customer[:lastname]}"
@@ -120,7 +123,7 @@ begin
   if defined?(payment_method_id) && payment_method_id
     # Generate a unique idempotency ID
     idempotency_id = "charge-#{Time.now.to_i}-#{rand(1000)}"
-    
+
     # Create a charge with additional options
     transaction = client.charge_payment_method({
       payment_method_id: payment_method_id,
@@ -147,7 +150,7 @@ begin
       idempotency_id: idempotency_id,
       channel: 'api-example'
     })
-    
+
     puts "Pre-authorization created successfully!"
     puts "Transaction ID: #{transaction.id}"
     puts "Type: #{transaction.type}"
@@ -158,19 +161,19 @@ begin
       puts "Method: #{transaction.method}"
       puts "Created at: #{transaction.created_at}"
       puts "Idempotency ID: #{idempotency_id}"
-      
+
       # Display payment method details
       if transaction.payment_method
         puts "Payment method: #{transaction.payment_method[:nickname]}"
         puts "Last four: #{transaction.last_four}"
       end
-      
+
       # Display customer details
       if transaction.customer
         puts "Customer: #{transaction.customer[:firstname]} #{transaction.customer[:lastname]}"
         puts "Email: #{transaction.customer[:email]}"
       end
-      
+
       # Store the transaction ID for later use in the capture example
       pre_auth_transaction_id = transaction.id
     else
@@ -195,10 +198,10 @@ begin
   if defined?(pre_auth_transaction_id) && pre_auth_transaction_id
     # Capture a partial amount of the pre-authorization
     capture_amount = 25.00
-    
+
     # Capture the pre-authorization
     transaction = client.capture_transaction(pre_auth_transaction_id, { total: capture_amount })
-    
+
     puts "Transaction captured successfully!"
     puts "Transaction ID: #{transaction.id}"
     puts "Type: #{transaction.type}"
@@ -207,13 +210,13 @@ begin
       puts "Captured amount: $#{transaction.total}"
       puts "Method: #{transaction.method}"
       puts "Created at: #{transaction.created_at}"
-      
+
       # Display payment method details
       if transaction.payment_method
         puts "Payment method: #{transaction.payment_method[:nickname]}"
         puts "Last four: #{transaction.last_four}"
       end
-      
+
       # Display customer details
       if transaction.customer
         puts "Customer: #{transaction.customer[:firstname]} #{transaction.customer[:lastname]}"
@@ -256,7 +259,7 @@ begin
         ]
       }
     })
-    
+
     puts "Payment method verification completed!"
     puts "Transaction ID: #{transaction.id}"
     puts "Type: #{transaction.type}"
@@ -266,19 +269,19 @@ begin
       puts "Amount: $#{transaction.total}"
       puts "Method: #{transaction.method}"
       puts "Created at: #{transaction.created_at}"
-      
+
       # Display payment method details
       if transaction.payment_method
         puts "Payment method: #{transaction.payment_method[:nickname]}"
         puts "Last four: #{transaction.last_four}"
       end
-      
+
       # Display customer details
       if transaction.customer
         puts "Customer: #{transaction.customer[:firstname]} #{transaction.customer[:lastname]}"
         puts "Email: #{transaction.customer[:email]}"
       end
-      
+
       puts "\nPayment method is valid and can be used for future transactions."
     else
       puts "Error message: #{transaction.message}"
@@ -311,7 +314,7 @@ begin
         tax: '0'
       }
     })
-    
+
     puts "Credit transaction completed!"
     puts "Transaction ID: #{transaction.id}"
     puts "Type: #{transaction.type}"
@@ -320,19 +323,19 @@ begin
       puts "Amount: $#{transaction.total}"
       puts "Method: #{transaction.method}"
       puts "Created at: #{transaction.created_at}"
-      
+
       # Display payment method details
       if transaction.payment_method
         puts "Payment method: #{transaction.payment_method[:nickname]}"
         puts "Last four: #{transaction.last_four}"
       end
-      
+
       # Display customer details
       if transaction.customer
         puts "Customer: #{transaction.customer[:firstname]} #{transaction.customer[:lastname]}"
         puts "Email: #{transaction.customer[:email]}"
       end
-      
+
       puts "\nCredit (refund) was successfully issued to the customer's payment method."
     else
       puts "Error message: #{transaction.message}"
@@ -351,4 +354,4 @@ rescue StaxPayments::StaxError => e
 end
 
 puts "=== Payment Examples Completed ==="
-puts "=== All Payment Examples Completed ===" 
+puts "=== All Payment Examples Completed ==="

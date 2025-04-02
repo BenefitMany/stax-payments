@@ -1,9 +1,11 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'bundler/setup'
+require 'pry-byebug'
 require 'dotenv/load'
-require 'stax_payments'
+require_relative '../lib/stax_payments'
+
+Dotenv.load('../.env')
 
 # Initialize the client
 client = if ENV['STAX_API_KEY']
@@ -116,7 +118,7 @@ puts "Voiding transaction #{transaction_id}..."
 
 begin
   result = client.void_transaction(transaction_id)
-  
+
   if result.is_a?(StaxPayments::StaxError)
     puts "Error voiding transaction: #{result.message}"
     puts "Status code: #{result.status_code}"
@@ -128,7 +130,7 @@ begin
     puts "Is Voidable: #{result.is_voidable ? 'Yes' : 'No'}"
     puts "Type: #{result.type}"
     puts "Status: #{result.success ? 'Success' : 'Failed'}"
-    
+
     if result.child_transactions && !result.child_transactions.empty?
       puts "Child Transactions:"
       result.child_transactions.each do |child|
@@ -156,7 +158,7 @@ puts "Refunding $#{refund_amount} from transaction #{transaction_id}..."
 
 begin
   result = client.refund_transaction(transaction_id, { total: refund_amount })
-  
+
   if result.is_a?(StaxPayments::StaxError)
     puts "Error refunding transaction: #{result.message}"
     puts "Status code: #{result.status_code}"
@@ -169,7 +171,7 @@ begin
     puts "Is Refundable: #{result.is_refundable ? 'Yes' : 'No'}"
     puts "Type: #{result.type}"
     puts "Status: #{result.success ? 'Success' : 'Failed'}"
-    
+
     if result.child_transactions && !result.child_transactions.empty?
       puts "Child Transactions:"
       result.child_transactions.each do |child|
