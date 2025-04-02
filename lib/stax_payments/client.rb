@@ -1,31 +1,31 @@
 # frozen_string_literal: true
 
 require_relative 'client/customers'
-require_relative 'client/payments'
-require_relative 'client/transactions'
 require_relative 'client/invoices'
-require_relative 'client/subscriptions'
-require_relative 'client/webhooks'
 require_relative 'client/payment_methods'
+require_relative 'client/payments'
+# require_relative 'client/subscriptions'
+require_relative 'client/transactions'
+require_relative 'client/webhooks'
 
 require_relative 'model/stax_model'
 require_relative 'model/customer'
-require_relative 'model/payment'
-require_relative 'model/transaction'
 require_relative 'model/invoice'
-require_relative 'model/subscription'
-require_relative 'model/webhook'
+require_relative 'model/payment'
 require_relative 'model/payment_method'
+# require_relative 'model/subscription'
+require_relative 'model/transaction'
+require_relative 'model/webhook'
 
 module StaxPayments
   class Client
     include StaxPayments::Client::Customers
+    include StaxPayments::Client::Invoices
+    include StaxPayments::Client::PaymentMethods
     include StaxPayments::Client::Payments
     include StaxPayments::Client::Transactions
-    include StaxPayments::Client::Invoices
-    include StaxPayments::Client::Subscriptions
+    # include StaxPayments::Client::Subscriptions
     include StaxPayments::Client::Webhooks
-    include StaxPayments::Client::PaymentMethods
 
     # API base URL from Stax API documentation
     API_BASE_URL = 'https://apiprod.fattlabs.com'.freeze
@@ -34,7 +34,7 @@ module StaxPayments
       @auth = auth || load_from_environment
 
       if @auth.nil?
-        raise StaxError, 'API authentication incomplete! You need the API key and API secret.'
+        raise StaxError, 'API authentication incomplete! You need the API key to access the Stax API.'
       end
     end
 
