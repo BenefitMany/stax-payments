@@ -85,7 +85,7 @@ module StaxPayments
       options_params = options[:params] || {}
       request_params = {
         method: request_type,
-        params: options_params.to_camelback_keys,
+        params: options_params,
         headers: stax_auth_headers,
         body: options[:body]&.to_json
       }
