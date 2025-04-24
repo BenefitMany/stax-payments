@@ -53,7 +53,7 @@ module StaxPayments
           raise StaxError, 'status must be one of: all, deleted'
         end
 
-        results = process_request(:get, 'payment-method', params: args)
+        results = process_request(:get, '/payment-method', params: args)
         return results if results.is_a?(StaxError)
 
         # Process pagination data
@@ -88,7 +88,7 @@ module StaxPayments
       #   puts payment_method.card_type # => "visa"
       #   puts payment_method.card_last_four # => "1111"
       def payment_method(payment_method_id)
-        result = process_request(:get, "payment-method/#{payment_method_id}")
+        result = process_request(:get, "/payment-method/#{payment_method_id}")
 
         # Handle 404 errors specifically for payment method not found
         if result.is_a?(StaxError) && result.response && result.response.code == 404
@@ -116,7 +116,7 @@ module StaxPayments
       #   end
       def customer_payment_methods(customer_id, args = {})
         # Use the dedicated endpoint for customer payment methods
-        result = process_request(:get, "customer/#{customer_id}/payment-method", params: args)
+        result = process_request(:get, "/customer/#{customer_id}/payment-method", params: args)
         return result if result.is_a?(StaxError)
 
         # The API returns an array of payment methods directly
@@ -131,7 +131,7 @@ module StaxPayments
       #   puts "Payment method deleted: #{payment_method.id}"
       #   puts "Deleted at: #{payment_method.deleted_at}"
       def delete_payment_method(payment_method_id)
-        result = process_request(:delete, "payment-method/#{payment_method_id}")
+        result = process_request(:delete, "/payment-method/#{payment_method_id}")
         return result if result.is_a?(StaxError)
 
         StaxPayments::PaymentMethod.new(result)
@@ -185,7 +185,7 @@ module StaxPayments
         # Validate required fields
         validate_payment_method_params(args)
 
-        result = process_request(:post, 'payment-method', body: args)
+        result = process_request(:post, '/payment-method', body: args)
         return result if result.is_a?(StaxError)
 
         StaxPayments::PaymentMethod.new(result)
@@ -226,7 +226,7 @@ module StaxPayments
         # Validate update parameters
         validate_update_payment_method_params(args)
 
-        result = process_request(:put, "payment-method/#{payment_method_id}", body: args)
+        result = process_request(:put, "/payment-method/#{payment_method_id}", body: args)
         return result if result.is_a?(StaxError)
 
         StaxPayments::PaymentMethod.new(result)
@@ -252,7 +252,7 @@ module StaxPayments
           raise StaxError, 'The gateway_token is required'
         end
 
-        result = process_request(:post, "payment_method/#{payment_method_id}/external_vault", body: { gateway_token: gateway_token })
+        result = process_request(:post, "/payment_method/#{payment_method_id}/external_vault", body: { gateway_token: gateway_token })
         return result if result.is_a?(StaxError)
 
         result
@@ -284,7 +284,7 @@ module StaxPayments
           raise StaxError, 'The total must be greater than 0'
         end
 
-        result = process_request(:get, 'surcharge/review', params: { payment_method_id: payment_method_id, total: total })
+        result = process_request(:get, '/surcharge/review', params: { payment_method_id: payment_method_id, total: total })
         return result if result.is_a?(StaxError)
 
         result
